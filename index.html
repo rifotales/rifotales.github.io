@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rifotales Studio</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Fonts from Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+<!-- Font Awesome for social media icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* Используем CSS-переменные для упрощения управления темами и цветами */
+:root {
+  --bg-color-start: #0e0d16;
+  --bg-color-end: #1b203a;
+  --text-color: #f1f1f1;
+  --link-hover-color: #8b96a8;
+  --gradient-start: #3b82f6;
+  --gradient-end: #1e3a8a;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-color);
+  background-color: var(--bg-color-start);
+  transition: background-color 0.5s ease;
+  overflow-x: hidden;
+  background: radial-gradient(circle at center, var(--bg-color-end) 0%, var(--bg-color-start) 100%);
+}
+
+h1, h2, h4 {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Применяем рукописный шрифт к определенным элементам */
+.font-dancing-script {
+  font-family: 'Dancing Script', cursive;
+  font-weight: 700;
+}
+
+/* Динамичный фон-холст */
+#bg-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  filter: blur(2px) brightness(0.8);
+  opacity: 0.9;
+  transition: opacity 0.5s ease;
+}
+
+/* Стиль секции Hero */
+.hero {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+.hero-content {
+  z-index: 10;
+}
+
+.hero h1 {
+  background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+  to { text-shadow: 0 0 20px rgba(30, 58, 138, 0.7); }
+}
+
+/* Анимация появления при прокрутке */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+  transition: opacity 1.2s cubic-bezier(0.25, 0.8, 0.25, 1), transform 1.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.fade-in.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Кинематографическая разделительная линия */
+.cinematic-line {
+  width: 0;
+  height: 3px;
+  background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+  margin: 1.5rem auto;
+  transition: width 0.8s ease;
+}
+
+.cinematic-line.is-visible {
+  width: 150px;
+}
+
+.video-card {
+  background-color: rgba(36, 41, 60, 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.video-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+  border-color: var(--gradient-start);
+}
+
+.video-card iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  transition: transform 0.4s ease;
+}
+
+.video-card:hover iframe {
+  transform: scale(1.05);
+}
+
+/* Стиль ссылок */
+.social-link {
+  transition: color 0.3s ease, transform 0.3s ease;
+  position: relative;
+}
+
+.social-link:hover {
+  color: var(--link-hover-color);
+  transform: scale(1.1);
+}
+
+.social-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--gradient-start);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.social-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Стиль для плавающего меню */
+.floating-menu {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 50;
+  transform: translateX(100px);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background-color: rgba(27, 32, 58, 0.4);
+  backdrop-filter: blur(10px);
+}
+
+.floating-menu.is-visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.menu-button {
+  transition: transform 0.3s ease, background-color 0.3s ease;
+  font-family: 'Dancing Script', cursive;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.menu-button:hover {
+  transform: translateY(-2px) scale(1.05);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Исправлено: Вместо !important используется более специфичный селектор */
+.menu-button.en-button {
+  font-family: 'Inter', sans-serif;
+}
+</style>
+</head>
+<body class="bg-gray-900">
+<!-- Динамичный фон-холст -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Плавающее меню, которое появляется при скролле -->
+<div id="floating-menu" class="floating-menu flex flex-col space-y-2 p-2 rounded-lg">
+  <!-- Добавлены aria-label для доступности -->
+  <a href="https://rifotales.github.io/home-en/" aria-label="English Version" class="menu-button en-button px-4 py-2 rounded-md text-sm font-semibold text-white">EN</a>
+  <a href="https://rifotales.github.io/sound/" aria-label="Перейти на страницу 'Звук'" target="_blank" class="menu-button px-4 py-2 rounded-md text-sm font-semibold text-white">Звук</a>
+  <a href="https://rifotales.github.io/voice/" aria-label="Перейти на страницу 'Голос'" target="_blank" class="menu-button px-4 py-2 rounded-md text-sm font-semibold text-white">Голос</a>
+</div>
+
+<!-- Секция Hero -->
+<header class="hero">
+<div class="hero-content">
+<h1 class="text-7xl md:text-9xl font-bold uppercase tracking-widest fade-in">Rifotales</h1>
+<h2 class="text-2xl md:text-3xl mt-6 font-light italic text-gray-300 fade-in delay-200 font-dancing-script">Твори. Исследуй. Проживи.</h2>
+<p class="text-lg md:text-2xl mt-4 text-gray-400 fade-in delay-300 font-dancing-script">Погрузись в миры, где каждая история оживает.</p>
+</div>
+</header>
+
+<main class="container mx-auto px-4 md:px-8 max-w-full lg:max-w-7xl py-16">
+
+<!-- Секция "О нас" -->
+<section id="about" class="mt-20 fade-in">
+<h3 class="text-3xl md:text-5xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-600 font-dancing-script">Предисловие</h3>
+<div class="cinematic-line"></div>
+<p class="mt-8 text-center text-lg md:text-xl leading-relaxed text-gray-300 max-w-4xl mx-auto">
+Наш девиз — "Твори, Исследуй и Проживи" — это сердце студии. Мы создаем миры, которые захватывают, вдохновляют и позволяют зрителям пережить историю вместе с нами. Каждая история создаётся внутри Rifotales и через эксперименты и изучения, как её рассказать, она получает свою жизнь, свой мир, свою экранизацию в разной или специальной форме. Добро пожаловать!
+</p>
+</section>
+
+<!-- Секция "Наши работы" -->
+<section id="works" class="mt-20 fade-in">
+<h3 class="text-3xl md:text-5xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-600 font-dancing-script">Наши работы</h3>
+<div class="cinematic-line"></div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mt-12">
+<!-- Видео-карты -->
+<!-- Короткометражный фильм 1: Помни -->
+<div class="video-card rounded-xl p-6 fade-in">
+<iframe src="https://www.youtube.com/embed/ic3BvK9vEdE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded-xl"></iframe>
+<h4 class="text-xl md:text-3xl mt-4 font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-indigo-500">Помни</h4>
+<p class="text-sm md:text-base text-gray-400 mt-2 italic">Люди теряют своих близких… А он — единственный, кто способен хранить последние слова, адресованные тем, кого они любили.</p>
+</div>
+<!-- Короткометражный фильм 2: Лик Кларикора -->
+<div class="video-card rounded-xl p-6 fade-in delay-100">
+<iframe src="https://www.youtube.com/embed/vzxL0Y-JgS8" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded-xl"></iframe>
+<h4 class="text-xl md:text-3xl mt-4 font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-indigo-500">Лик Кларикора</h4>
+<p class="text-sm md:text-base text-gray-400 mt-2 italic">История расскажет о мальчишке который не ожидал увидеть в окне его...</p>
+</div>
+<!-- Короткометражный фильм 3: Ледяной дозор -->
+<div class="video-card rounded-xl p-6 fade-in delay-200">
+<iframe src="https://www.youtube.com/embed/NuexAepUN1s" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded-xl"></iframe>
+<h4 class="text-xl md:text-3xl mt-4 font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-indigo-500">Ледяной дозор</h4>
+<p class="text-sm md:text-base text-gray-400 mt-2 italic">Мир во время ядерной зимы</p>
+</div>
+<!-- Короткометражный фильм 4: Запись Dd57 - Наблюдатель -->
+<div class="video-card rounded-xl p-6 fade-in delay-300">
+<iframe src="https://www.youtube.com/embed/3EKlHyex890" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded-xl"></iframe>
+<h4 class="text-xl md:text-3xl mt-4 font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-indigo-500">Запись Dd57 - Наблюдатель</h4>
+<p class="text-sm md:text-base text-gray-400 mt-2 italic">Короткометражный фильм о наблюдении и тайнах.</p>
+</div>
+<!-- Короткометражный фильм 5: Диаболь - Тайна отца -->
+<div class="video-card rounded-xl p-6 fade-in delay-400">
+<iframe src="https://www.youtube.com/embed/EaopjuhBP0Q" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded-xl"></iframe>
+<h4 class="text-xl md:text-3xl mt-4 font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-indigo-500">Диаболь - Тайна отца</h4>
+<p class="text-sm md:text-base text-gray-400 mt-2 italic">Сюжет, полный загадок и семейных секретов.</p>
+</div>
+</div>
+</section>
+
+<!-- Секция "Свяжитесь с нами" -->
+<section id="contact" class="mt-20 fade-in text-center">
+<h3 class="text-3xl md:text-5xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-600 font-dancing-script">Свяжитесь с нами</h3>
+<div class="cinematic-line"></div>
+<div class="flex flex-wrap justify-center gap-x-10 gap-y-6 mt-8 text-2xl">
+  <!-- Добавлены aria-label для доступности и удобства использования -->
+  <a href="https://www.youtube.com/@rifotales" target="_blank" class="social-link" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+  <a href="https://t.me/rifotales" target="_blank" class="social-link" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+  <a href="https://www.facebook.com/people/Rifotales/61565675293141/" target="_blank" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+  <a href="https://www.instagram.com/rifotales/" target="_blank" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+  <a href="https://x.com/riforka" target="_blank" class="social-link" aria-label="X (formerly Twitter)"><i class="fab fa-x-twitter"></i></a>
+  <a href="mailto:riforpik@gmail.com" class="social-link" aria-label="Email"><i class="fas fa-envelope"></i></a>
+</div>
+</section>
+</main>
+
+<script>
+// Настройка Intersection Observer для анимации появления элементов
+const fadeInElements = document.querySelectorAll('.fade-in');
+const lineElements = document.querySelectorAll('.cinematic-line');
+
+const observerOptions = {
+  root: null,
+  rootMargin: '0px',
+  threshold: 0.3
+};
+
+const observer = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+      // Прекращаем наблюдение, так как анимация уже сработала
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+fadeInElements.forEach(el => observer.observe(el));
+lineElements.forEach(el => observer.observe(el));
+
+// --- Анимация динамичного фона-холста ---
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let width, height;
+let particles = [];
+let whales = [
+  { x: -250, y: 0, speed: 0.25, size: 250, rotation: 0, rotationSpeed: 0.0015, yOffset: 0, color: 'rgba(59, 130, 246, 0.2)' },
+  { x: -600, y: 0, speed: 0.18, size: 180, rotation: 0, rotationSpeed: -0.0008, yOffset: 150, color: 'rgba(30, 58, 138, 0.25)' },
+  { x: -400, y: 0, speed: 0.12, size: 120, rotation: 0, rotationSpeed: 0.001, yOffset: -100, color: 'rgba(79, 70, 229, 0.15)' }
+];
+let frameCount = 0;
+
+// Функция для изменения размера холста и сброса анимации
+function resizeCanvas() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  createParticles();
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Создаем частицы для анимации фона
+function createParticles() {
+  particles = [];
+  for (let i = 0; i < 250; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      radius: Math.random() * 3 + 1,
+      vx: Math.random() * 0.3 - 0.15,
+      vy: Math.random() * 0.3 - 0.15,
+      color: `rgba(${Math.random() * 50 + 200}, ${Math.random() * 50 + 200}, 255, ${Math.random() * 0.3 + 0.1})`
+    });
+  }
+}
+
+// Обновляем состояние анимации (позиции китов, частиц)
+function update() {
+  frameCount++;
+  // Перемещение китов
+  whales.forEach((whale, index) => {
+    whale.x += whale.speed;
+    // Используем синусоидальную волну для плавного движения вверх и вниз
+    whale.y = Math.sin(frameCount * 0.015 + index * Math.PI) * 20 + height / 2 + whale.yOffset;
+    // Вращение для эффекта "ныряния"
+    whale.rotation = Math.sin(frameCount * whale.rotationSpeed) * 0.08;
+
+    // Сбрасываем позицию кита, если он ушел за экран
+    if (whale.x > width + whale.size * 2) {
+      whale.x = -whale.size * 2;
+    }
+  });
+  // Обновление частиц
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // Перемещаем частицы наверх, когда они выходят за пределы экрана
+    if (p.x < -10 || p.x > width + 10 || p.y < -10 || p.y > height + 10) {
+      p.x = Math.random() * width;
+      p.y = height + 10;
+    }
+  });
+}
+
+// Отрисовка всех элементов на холсте
+function draw() {
+  // Очищаем холст
+  ctx.clearRect(0, 0, width, height);
+
+  // Рисуем мягкий радиальный градиент для эффекта глубины
+  const gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.max(width, height));
+  gradient.addColorStop(0, '#1b203a');
+  gradient.addColorStop(0.5, '#121626');
+  gradient.addColorStop(1, '#0a0e1a');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+
+  // Рисуем плавающие частицы
+  particles.forEach(p => {
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Рисуем силуэты китов
+  whales.forEach(whale => {
+    ctx.save();
+    ctx.translate(whale.x, whale.y);
+    ctx.rotate(whale.rotation);
+    
+    // Задаем цвет и пульсирующую прозрачность
+    const pulseAlpha = Math.sin(frameCount * 0.02) * 0.1 + 0.2;
+    ctx.fillStyle = whale.color.replace(/, [\d\.]+\)$/, `, ${pulseAlpha})`);
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    // Улучшенная форма кита
+    ctx.quadraticCurveTo(whale.size * 0.8, -whale.size * 0.4, whale.size * 2, 0);
+    ctx.quadraticCurveTo(whale.size * 0.8, whale.size * 0.4, 0, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  });
+}
+
+// Главный цикл анимации
+function animate() {
+  update();
+  draw();
+  requestAnimationFrame(animate);
+}
+
+// Запускаем цикл анимации при загрузке страницы
+window.onload = function() {
+  animate();
+};
+
+// --- JavaScript для появления/исчезновения плавающего меню ---
+const floatingMenu = document.getElementById('floating-menu');
+const scrollThreshold = 100; // Порог в пикселях для появления меню
+
+window.addEventListener('scroll', () => {
+  if (window.scrollY > scrollThreshold) {
+    floatingMenu.classList.add('is-visible');
+  } else {
+    floatingMenu.classList.remove('is-visible');
+  }
+});
+</script>
+
+<!-- === Добавленный скрипт: сохраняет ближайший к центру section как якорь при переходе на английскую версию === -->
+<script>
+(function(){
+  const enLink = document.querySelector('.menu-button.en-button');
+  if(!enLink) return;
+  const originalHref = enLink.getAttribute('href') || '';
+
+  // Найти секцию, ближайшую к центру окна просмотра (по вертикали)
+  function getClosestSectionId(){
+    const sections = document.querySelectorAll('section[id]');
+    if(!sections.length) return null;
+    const viewportCenterY = window.scrollY + window.innerHeight / 2;
+    let best = null;
+    let bestDist = Infinity;
+    sections.forEach(s => {
+      const rect = s.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      const dist = Math.abs(top - viewportCenterY);
+      if (dist < bestDist) { bestDist = dist; best = s; }
+    });
+    return best ? best.id : null;
+  }
+
+  // При клике — дописать якорь к href (не нарушая других параметров)
+  enLink.addEventListener('click', function (e) {
+    try {
+      const id = getClosestSectionId();
+      if (id) {
+        const base = originalHref.split('#')[0];
+        // если оригинальная ссылка уже содержит якорь, заменяем его
+        enLink.setAttribute('href', base + '#' + id);
+        // для безопасности: небольшая задержка, чтобы href успел измениться перед навигацией
+        // (браузеры обычно читают href при клике синхронно, но задержка помогает в редких случаях)
+        // не предотвращаем стандартный переход
+      }
+    } catch (err) {
+      // молча игнорируем ошибки, чтобы не мешать навигации
+    }
+  });
+
+  // Альтернативно: если используется открытие в новом окне через target="_blank", можно
+  // сохранить идентификатор в sessionStorage и на целевой странице использовать его.
+  // Я не включяю восстановление на целевой странице, чтобы не менять поведение сторонних URL.
+})();
+</script>
+
+</body>
+</html>
